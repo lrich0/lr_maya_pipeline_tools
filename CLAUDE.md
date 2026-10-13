@@ -31,11 +31,20 @@ goes in as a shelf-callable function.
 
 - **Runtime is Maya's embedded Python** (Python 3, Maya 2022+). Code uses
   `maya.cmds`, `maya.mel`, and `maya.api.OpenMaya.MImage`.
-- **You cannot run or test this code in this sandbox** — there is no Maya
-  here. Do not add `pip install maya` or mock imports into the module
+- **Maya is not available to the agent, so you can't run or test this
+  code.** Do not add `pip install maya` or mock imports into the module
   itself. Static analysis, careful reading, and reasoning about Maya API
   behavior are the verification tools. Flag anything that needs in-Maya
   testing in your summary so a human can verify.
+- Scripts must remain **shelf-button friendly**: importable as a module
+  (`import ul_pipelineTools`) with functions callable as
+  `ul_pipelineTools.funcName()`. If a floating UI is ever revisited, its
+  callbacks must be Python callables or `functools.partial`, never bare
+  string callbacks — that is what broke the old `floatingWindow`.
+- Windows paths appear in places (`D:/CACHE/...`). Studio machines are
+  Windows; RMIT lab machines may not be. Prefer configurable paths over
+  hardcoded ones, but don't break the existing Windows workflow.
+
 ## Renderer support
 
 **Arnold (MtoA) is the primary renderer** — most students render with
@@ -66,6 +75,7 @@ or break existing `rs*` handling.
   could be added later (e.g. a prefix/slot lookup, not scattered
   if-Redshift checks). New renderer-facing features should be built and
   tested Arnold-first, then extended to Redshift.
+
 ### Decided: separate shelf buttons per renderer
 
 Renderer-facing tools get **one shelf button per renderer** rather than
@@ -79,38 +89,11 @@ as an argument (`exportShaders('arnold')` / `exportShaders('redshift')`)
 with a lookup table for the prefix, SG slot, and colour-attribute names.
 Keep the no-argument form working for existing studio shelves.
 
-The current module is **Redshift-only in practice** despite Arnold being
-primary — see the Arnold issues in ISSUES.md.
+Arnold support is incomplete — see ISSUES 14–16.
 
+## Copy/paste temp path
 
-- Scripts must remain **shelf-button friendly**: importable as a module
-  (`import ul_pipelineTools`) with functions callable as
-  `ul_pipelineTools.funcName()`. If a floating UI is ever revisited, its
-  callbacks must be Python callables or `functools.partial`, never bare
-  string callbacks — that is what broke the old `floatingWindow`.
-- Windows paths appear in places (`D:/CACHE/...`). Studio machines are
-  Windows; RMIT lab machines may not be. Prefer configurable paths over
-  hardcoded ones, but don't break the existing Windows workflow.
-
-## Copy/paste temp path — RESOLVED
-
-`copyToTempFile` / `pasteFromTempFile` no longer use the old
-`D:/CACHE/maya/temp/copypaste.mb` ("set to work for Hugo"). They default
-to a **per-user Windows path**, `c:/scratch/<username>/mayatemp/copypaste.mb`,
-built by the `copyPasteTempFile()` helper from `getpass.getuser()`. The
-folder is created on demand by the copy side.
-
-Decision (user, 2026-08-03): **Windows-only** — Mac is out of scope. No
-env var / `tempfile` indirection; the explicit `c:/scratch/<username>/`
-path is wanted. The username segment prevents students on a shared
-machine from colliding on (or reading) each other's clipboard file.
-Cross-*machine* paste is not supported — this is local disk only.
-
-The path was previously hardcoded in **two** places (Python defaults and
-the shelf `-command` args); both were changed — the shelf args now call
-`copyToTempFile()` / `pasteFromTempFile()` with no argument, and the
-Python default is `None` → falls back to the helper. The explicit-path
-param is kept for backwards compatibility with studio shelves.
+Copy/paste uses a per-user Windows temp path; see ISSUES #5.
 
 ## scripts/temp — extracted shelf scripts, all need revisiting
 
@@ -137,7 +120,7 @@ Working scenes ideally live in a `_working` folder with versioned names:
     publishedShaders/          <scene>_shaders.mb
     scenes/camera/<shot>/      <shot>_cam_v###.mb
 ```
-- ideal workflow is as outlined:
+ideal workflow is as outlined:
 - Version token is `_v` + zero-padded int, before the extension.
 - Publish paths are derived by stripping the filename and `_working`
   segment from the current scene path. Four functions duplicate this
