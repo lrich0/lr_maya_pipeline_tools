@@ -79,7 +79,7 @@ each button (Overwrite replaces v004; Esc saves nothing); (f) `test.mb`
 with `test_v001.mb` already on disk → v001 dialog, then the
 already-exists dialog; (g) File > Recent Files lists the new version.
 
-### 4. `exportCamera` issues
+### 4. `exportCamera` issues — DONE
 - `sceneDirectory` is only assigned inside `if 'scene' in workspace
   fileRules` → NameError if the rule is missing.
 - Version padding: new version re-pads to the *previous* file's padding
@@ -90,6 +90,33 @@ already-exists dialog; (g) File > Recent Files lists the new version.
 - ~~Not wired into the UI at all~~ — it *is* on the shelf, as two buttons
   (`exportCamera(False)` / `exportCamera(True)`). The NameError path is
   therefore live and artist-reachable.
+
+**Fixed:**
+- Missing `scene` file rule → falls back to the scene file's own folder
+  (`<sceneFolder>/camera/<shot>/`, per the "outputs are siblings of the
+  scene" rule in CLAUDE.md) and prints which folder it used. No NameError.
+- One code path for all versions: highest existing version + 1, always
+  `zfill(3)`. Versions are compared as integers (sorted list, max of the
+  parsed numbers), so `v1000` beats `v999` and the result no longer
+  depends on `getFileList` order.
+- Only `<shot>_cam_v*.mb` files are considered; other `.mb` files in the
+  folder, or files with a non-numeric version, are ignored.
+
+**Still open, not changed (needs a call):**
+- The `camera/<shot>/` folder is never created. If it doesn't exist the
+  export probably fails (same gap as `publishAll` in #8) — confirm in
+  Maya; fix would be an `os.makedirs` like `exportSelectedABC` has.
+- No untitled-scene guard: an unsaved scene gives an empty shot name and
+  exports `_cam_v001.mb` into `.../camera/`. Shot name (text before the
+  first `_`) isn't validated either.
+
+*Verify in Maya:* (a) select a camera in `shot010_anim_v001.mb`, Export
+Camera → `scenes/camera/shot010/shot010_cam_v001.mb`; run again → `v002`;
+(b) drop a stray `other.mb` and a `shot010_cam_v009.mb` in that folder →
+next export is `v010`; (c) Export Camera Ref button → same numbering,
+exported as reference; (d) in a project whose workspace has no `scene`
+rule → exports under `<scene folder>/camera/shot010/` and the script
+editor says so.
 
 ### 5. Hardcoded temp path in copy/paste tools — DONE
 Was `D:/CACHE/maya/temp/copypaste.mb` ("set to work for Hugo").
