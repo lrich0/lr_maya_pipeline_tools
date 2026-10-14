@@ -486,10 +486,10 @@ def makeViewportShader(size=512):
     if sel:
         for item in sel:
             #print(mc.nodeType(item))
-            sg = mc.listConnections(sel,type='shadingEngine')
-            
+            sg = mc.listConnections(item,type='shadingEngine')
+
             #print(sg)
-            
+
             if not (sg):
                 print('making new shading group')
                 sg = mc.sets(name=item+'SG', empty=True, renderable=True, noSurfaceShader=True)
