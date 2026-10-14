@@ -42,7 +42,7 @@ def versionUp():
     if not sep or not currentVersion.isdigit():
         firstName = baseName + '_v001' + ext
         answer = mc.confirmDialog(title='Version Up',
-                                  message='No version token found in "' + currentName + '".\n\nSave as ' + firstName + '?',
+                                  message='No version number found in "' + currentName + '" filename.\n\nSave as ' + firstName + '?',
                                   button=['Save as _v001', 'Cancel'],
                                   defaultButton='Save as _v001', cancelButton='Cancel', dismissString='Cancel')
         if answer != 'Save as _v001':
@@ -68,9 +68,9 @@ def versionUp():
         answer = mc.confirmDialog(title='Version Up',
                                   message=os.path.basename(incrementScene) + ' already exists.\n\n'
                                           'Next free version is ' + os.path.basename(freeScene) + '.',
-                                  button=['Save as v' + freeVersion, 'Overwrite', 'Cancel'],
+                                  button=['Save as v' + freeVersion, 'Overwrite v' + newVersion, 'Cancel'],
                                   defaultButton='Save as v' + freeVersion, cancelButton='Cancel', dismissString='Cancel')
-        if answer == 'Overwrite':
+        if answer == 'Overwrite v' + newVersion:
             pass
         elif answer == 'Save as v' + freeVersion:
             incrementScene = freeScene

@@ -66,7 +66,7 @@ Add validation + a user-facing warning instead of a traceback.
 
 - Next version already on disk (was silently overwritten) → confirm
   dialog (user decision, 2026-10-14) with three buttons: **Save as
-  v<next free>** (default, Enter), **Overwrite**, **Cancel** (also Esc /
+  v<next free>** (default, Enter), **Overwrite v<target>** (the existing file it would replace), **Cancel** (also Esc /
   closing the window). Next free = first unused number above the target,
   same padding.
 
