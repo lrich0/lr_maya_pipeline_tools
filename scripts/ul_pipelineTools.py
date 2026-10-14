@@ -11,28 +11,47 @@ def saveAndBackup():
     mel.eval("incrementalSaveScene;")
 
 def versionUp():
+    """Save the current scene as the next version, e.g. shot010_anim_v003.mb -> shot010_anim_v004.mb.
+
+    USAGE: shelf button. The scene must already be saved with a _v### version
+    token before the extension. Keeps the scene's file type (.ma or .mb).
+    """
     #version up the current file without publishing
     #save current version first
     #mel.eval("source incrementalSaveScene;")
     #mel.eval("incrementalSaveScene;")
-    
+
     currentScene = mc.file(query=True, sceneName=True)
+    if not currentScene:
+        mc.warning('versionUp: scene has not been saved yet - save it as name_v001.mb first')
+        return
+
     currentName = mc.file(query=True, sceneName=True, shortName=True)
-    
-    suffix = currentName.split("_v")
-    currentVersion = suffix[1].split(".")
-    #print(currentVersion[0])
-    length = len(currentVersion[0])
-    newVersion = str(int(currentVersion[0]) + 1).zfill(length)
-   
-    newName = suffix[0] + "_v" + newVersion + "." + currentVersion[1]
-       
-    incrementScene = currentScene.replace(currentName,newName)
+    baseName, ext = os.path.splitext(currentName)
+
+    #version token is the last "_v" followed by digits, right before the extension
+    head, sep, currentVersion = baseName.rpartition('_v')
+    if not sep or not currentVersion.isdigit():
+        mc.warning('versionUp: no version token found in "' + currentName + '" - save it as ' + baseName + '_v001' + ext + ' first')
+        return
+
+    fileTypes = {'.ma': 'mayaAscii', '.mb': 'mayaBinary'}
+    fileType = fileTypes.get(ext.lower())
+    if not fileType:
+        mc.warning('versionUp: "' + currentName + '" is not a .ma or .mb scene')
+        return
+
+    length = len(currentVersion)
+    newVersion = str(int(currentVersion) + 1).zfill(length)
+
+    newName = head + "_v" + newVersion + ext
+
+    incrementScene = os.path.dirname(currentScene) + '/' + newName
     #publishScene = currentScene.replace("_working","published")
-    
+
     mc.file( rename=incrementScene)
-    mc.file( save=True, type='mayaBinary',  )
-    mel.eval('addRecentFile "'+incrementScene+'" "mayaBinary";')
+    mc.file( save=True, type=fileType )
+    mel.eval('addRecentFile "'+incrementScene+'" "'+fileType+'";')
         
 # Saves the current file and exports everything in the scene as a new file in the published folder
 # doesnt work if the file exists outside of the Unlisted workflow
