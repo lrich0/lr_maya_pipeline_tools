@@ -45,11 +45,34 @@ disk, `newImgName` is never assigned and the following
 `mc.setAttr(... newImgName ...)` raises `UnboundLocalError`. Same if a
 non-UDIM texture path doesn't exist. Needs a guard.
 
-### 3. `versionUp` fragility
+### 3. `versionUp` fragility — DONE
 - Hard-crashes (IndexError) on filenames without `_v`.
 - Always saves as mayaBinary even if the scene is `.ma`.
 - No guard for unsaved/untitled scenes (`sceneName` returns '').
 Add validation + a user-facing warning instead of a traceback.
+
+**Fixed:**
+- Untitled scene → `mc.warning` ("save it as name_v001.mb first"), no save.
+- Version token is now the *last* `_v` + digits before the extension
+  (`rpartition`), so names like `shot_village_v003.mb` work; a missing or
+  non-numeric token warns with a suggested name instead of crashing.
+- File type follows the extension (`.ma` → mayaAscii, `.mb` →
+  mayaBinary), also passed to `addRecentFile`; anything else warns.
+- New path is built from `os.path.dirname` + new name rather than
+  `str.replace`, which could also rewrite a matching folder name.
+- Padding width still follows the existing token (unchanged behaviour).
+- Docstring added.
+
+**Still open, not changed:** if the next version already exists on disk
+(e.g. versioning up v003 when v004 exists) it is silently overwritten —
+same as before. Needs a decision: warn and abort, confirm dialog, or skip
+to the next free number.
+
+*Verify in Maya:* (a) new untitled scene → warning, nothing saved;
+(b) `test.mb` → warning suggesting `test_v001.mb`; (c) `shot_v003.ma` →
+`shot_v004.ma` saved as ASCII (open in a text editor); (d)
+`shot_village_v009.mb` → `shot_village_v010.mb`; (e) File > Recent Files
+lists the new version.
 
 ### 4. `exportCamera` issues
 - `sceneDirectory` is only assigned inside `if 'scene' in workspace
