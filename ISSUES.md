@@ -187,13 +187,15 @@ rather than traceback. Never auto-load a render plugin from these tools.
 
 ## Newly found bugs (not previously listed)
 
-### 17. `makeViewportShader` reads the wrong shading group in a multi-selection
-Inside `for item in sel:` the lookup is
-`sg = mc.listConnections(sel, type='shadingEngine')` — it passes `sel`,
+### 17. `makeViewportShader` reads the wrong shading group in a multi-selection — DONE
+Inside `for item in sel:` the lookup was
+`sg = mc.listConnections(sel, type='shadingEngine')` — it passed `sel`,
 the whole selection, not `item`. With more than one material selected
-every iteration picks `sg[0]`, the first shading group found across the
-entire selection, so all generated viewport lambers are wired to one SG.
-Should be `mc.listConnections(item, ...)`.
+every iteration picked `sg[0]`, the first shading group found across the
+entire selection, so all generated viewport lamberts were wired to one SG.
+
+**Fixed:** lookup is now `mc.listConnections(item, type='shadingEngine')`.
+Single-material behaviour is unchanged.
 
 *Verify in Maya:* select two materials on different objects, run
 `makeViewportShader()`, confirm each object gets its own `vp___` lambert
