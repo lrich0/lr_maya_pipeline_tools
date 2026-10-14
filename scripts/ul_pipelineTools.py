@@ -13,8 +13,10 @@ def saveAndBackup():
 def versionUp():
     """Save the current scene as the next version, e.g. shot010_anim_v003.mb -> shot010_anim_v004.mb.
 
-    USAGE: shelf button. The scene must already be saved with a _v### version
-    token before the extension. Keeps the scene's file type (.ma or .mb).
+    USAGE: shelf button. Keeps the scene's file type (.ma or .mb).
+    If the scene has no _v### version token, offers to save it as name_v001.
+    If the next version already exists, asks: save as the next free version,
+    overwrite, or cancel.
     """
     #version up the current file without publishing
     #save current version first
@@ -29,25 +31,51 @@ def versionUp():
     currentName = mc.file(query=True, sceneName=True, shortName=True)
     baseName, ext = os.path.splitext(currentName)
 
-    #version token is the last "_v" followed by digits, right before the extension
-    head, sep, currentVersion = baseName.rpartition('_v')
-    if not sep or not currentVersion.isdigit():
-        mc.warning('versionUp: no version token found in "' + currentName + '" - save it as ' + baseName + '_v001' + ext + ' first')
-        return
-
     fileTypes = {'.ma': 'mayaAscii', '.mb': 'mayaBinary'}
     fileType = fileTypes.get(ext.lower())
     if not fileType:
         mc.warning('versionUp: "' + currentName + '" is not a .ma or .mb scene')
         return
 
-    length = len(currentVersion)
-    newVersion = str(int(currentVersion) + 1).zfill(length)
+    #version token is the last "_v" followed by digits, right before the extension
+    head, sep, currentVersion = baseName.rpartition('_v')
+    if not sep or not currentVersion.isdigit():
+        firstName = baseName + '_v001' + ext
+        answer = mc.confirmDialog(title='Version Up',
+                                  message='No version token found in "' + currentName + '".\n\nSave as ' + firstName + '?',
+                                  button=['Save as _v001', 'Cancel'],
+                                  defaultButton='Save as _v001', cancelButton='Cancel', dismissString='Cancel')
+        if answer != 'Save as _v001':
+            return
+        head = baseName
+        newVersion = '001'
+    else:
+        length = len(currentVersion)
+        newVersion = str(int(currentVersion) + 1).zfill(length)
 
-    newName = head + "_v" + newVersion + ext
-
-    incrementScene = os.path.dirname(currentScene) + '/' + newName
+    sceneDir = os.path.dirname(currentScene)
+    incrementScene = sceneDir + '/' + head + "_v" + newVersion + ext
     #publishScene = currentScene.replace("_working","published")
+
+    #next version already on disk - ask rather than silently overwrite
+    if os.path.exists(incrementScene):
+        freeVersion = newVersion
+        freeScene = incrementScene
+        while os.path.exists(freeScene):
+            freeVersion = str(int(freeVersion) + 1).zfill(len(newVersion))
+            freeScene = sceneDir + '/' + head + "_v" + freeVersion + ext
+
+        answer = mc.confirmDialog(title='Version Up',
+                                  message=os.path.basename(incrementScene) + ' already exists.\n\n'
+                                          'Next free version is ' + os.path.basename(freeScene) + '.',
+                                  button=['Save as v' + freeVersion, 'Overwrite', 'Cancel'],
+                                  defaultButton='Save as v' + freeVersion, cancelButton='Cancel', dismissString='Cancel')
+        if answer == 'Overwrite':
+            pass
+        elif answer == 'Save as v' + freeVersion:
+            incrementScene = freeScene
+        else:
+            return
 
     mc.file( rename=incrementScene)
     mc.file( save=True, type=fileType )

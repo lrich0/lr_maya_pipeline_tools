@@ -54,8 +54,9 @@ Add validation + a user-facing warning instead of a traceback.
 **Fixed:**
 - Untitled scene → `mc.warning` ("save it as name_v001.mb first"), no save.
 - Version token is now the *last* `_v` + digits before the extension
-  (`rpartition`), so names like `shot_village_v003.mb` work; a missing or
-  non-numeric token warns with a suggested name instead of crashing.
+  (`rpartition`), so names like `shot_village_v003.mb` work.
+- Missing or non-numeric token → confirm dialog offering to save as
+  `<name>_v001<ext>` (Save as _v001 / Cancel) instead of crashing.
 - File type follows the extension (`.ma` → mayaAscii, `.mb` →
   mayaBinary), also passed to `addRecentFile`; anything else warns.
 - New path is built from `os.path.dirname` + new name rather than
@@ -63,16 +64,20 @@ Add validation + a user-facing warning instead of a traceback.
 - Padding width still follows the existing token (unchanged behaviour).
 - Docstring added.
 
-**Still open, not changed:** if the next version already exists on disk
-(e.g. versioning up v003 when v004 exists) it is silently overwritten —
-same as before. Needs a decision: warn and abort, confirm dialog, or skip
-to the next free number.
+- Next version already on disk (was silently overwritten) → confirm
+  dialog (user decision, 2026-10-14) with three buttons: **Save as
+  v<next free>** (default, Enter), **Overwrite**, **Cancel** (also Esc /
+  closing the window). Next free = first unused number above the target,
+  same padding.
 
 *Verify in Maya:* (a) new untitled scene → warning, nothing saved;
-(b) `test.mb` → warning suggesting `test_v001.mb`; (c) `shot_v003.ma` →
-`shot_v004.ma` saved as ASCII (open in a text editor); (d)
-`shot_village_v009.mb` → `shot_village_v010.mb`; (e) File > Recent Files
-lists the new version.
+(b) `test.mb` → dialog; Save writes `test_v001.mb`, Cancel saves nothing;
+(c) `shot_v003.ma` → `shot_v004.ma` saved as ASCII (open in a text
+editor); (d) `shot_village_v009.mb` → `shot_village_v010.mb`; (e) with
+`shot_v003.mb` open and `v004`, `v005` on disk → dialog offers v006; try
+each button (Overwrite replaces v004; Esc saves nothing); (f) `test.mb`
+with `test_v001.mb` already on disk → v001 dialog, then the
+already-exists dialog; (g) File > Recent Files lists the new version.
 
 ### 4. `exportCamera` issues
 - `sceneDirectory` is only assigned inside `if 'scene' in workspace
