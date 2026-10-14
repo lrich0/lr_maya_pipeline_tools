@@ -162,21 +162,25 @@ def exportCamera(ref=False):
         currentScene = os.path.abspath(mc.file(query=True, sceneName=True))
         if 'scene' in mc.workspace(q=True, frl=True):
             sceneDirectory = os.path.join(projectDirectory, mc.workspace(fre='scene'))
-        #print(sceneDirectory)    
-
-        
-        camFilePath = sceneDirectory +'/camera/' + shotName +'/'
-        
-
-        fileList = mc.getFileList(filespec='*.mb',folder=camFilePath)
-        print(fileList)
-        if(fileList == None):
-            version = 1
         else:
-            latestVersion = fileList[-1].split('.')[0].split('_v')[-1]
-            length = len(latestVersion)
-            version = str(int(latestVersion) + 1).zfill(length)
-            #version = int(latestVer) + 1
+            #no 'scene' file rule in this project - fall back to the scene file's own folder
+            sceneDirectory = os.path.dirname(mc.file(query=True, sceneName=True))
+            print('// exportCamera: project has no "scene" file rule - using ' + sceneDirectory + ' //')
+        #print(sceneDirectory)
+
+
+        camFilePath = sceneDirectory +'/camera/' + shotName +'/'
+
+
+        #find the highest existing version for this shot - compare as numbers, not
+        #by list order, so v010 beats v009 and v1000 beats v999
+        fileList = mc.getFileList(filespec=shotName + '_cam_v*.mb', folder=camFilePath) or []
+        latestVersion = 0
+        for camFile in sorted(fileList):
+            fileVersion = os.path.splitext(camFile)[0].rpartition('_v')[2]
+            if fileVersion.isdigit():
+                latestVersion = max(latestVersion, int(fileVersion))
+        version = latestVersion + 1
         camFileName = shotName + '_cam_v' + str(version).zfill(3) + '.mb'
         #save the published file
         if not (ref):
