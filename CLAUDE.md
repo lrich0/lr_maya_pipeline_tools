@@ -1,8 +1,8 @@
-# CLAUDE.md — Unlisted Maya Pipeline Tools
+# CLAUDE.md — lr_maya_pipeline_tools
 
 ## What this is
 
-In-house Maya pipeline tools for the "Unlisted" workflow (VFX/animation
+In-house Maya pipeline tools for the studio workflow (VFX/animation
 production, shared with pipeline work at RMIT). Tools are launched from
 Maya shelf buttons and cover:
 
@@ -14,8 +14,8 @@ Maya shelf buttons and cover:
 
 ## Interface — shelf only
 
-`prefs/shelves/shelf_Unlisted.mel` is **the** interface. Every shelf
-button calls a function in `ul_pipelineTools`; there is no other entry
+`prefs/shelves/shelf_lr_maya_pipeline_tools.mel` is **the** interface. Every shelf
+button calls a function in `lr_pipelineTools`; there is no other entry
 point and no in-Maya UI.
 
 The two floating windows (`floatingWindow`, `rsGeoSettingsWindow`, plus
@@ -37,8 +37,8 @@ goes in as a shelf-callable function.
   behavior are the verification tools. Flag anything that needs in-Maya
   testing in your summary so a human can verify.
 - Scripts must remain **shelf-button friendly**: importable as a module
-  (`import ul_pipelineTools`) with functions callable as
-  `ul_pipelineTools.funcName()`. If a floating UI is ever revisited, its
+  (`import lr_pipelineTools`) with functions callable as
+  `lr_pipelineTools.funcName()`. If a floating UI is ever revisited, its
   callbacks must be Python callables or `functools.partial`, never bare
   string callbacks — that is what broke the old `floatingWindow`.
 - Windows paths appear in places (`D:/CACHE/...`). Studio machines are
@@ -108,7 +108,7 @@ dup/bake/FBX-export block appears three times, rig tools hardcode set
 and group names, and none guard an empty selection. Do not put any of it
 back on the shelf as-is.
 
-## Directory conventions (the "Unlisted" workflow)
+## Directory conventions (studio workflow)
 
 Working scenes ideally live in a `_working` folder with versioned names:
 

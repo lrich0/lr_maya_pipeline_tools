@@ -1,4 +1,4 @@
-# Backlog — ul_pipelineTools
+# Backlog — lr_pipelineTools
 
 Ordered roughly by severity. Bugs first, then refactors, then extensions.
 
@@ -10,7 +10,7 @@ Ordered roughly by severity. Bugs first, then refactors, then extensions.
 resolve in `__main__`).
 
 **Resolved by deletion.** `floatingWindow()` was never on the shelf, so
-nothing could reach it. Removed from `ul_pipelineTools.py` along with
+nothing could reach it. Removed from `lr_pipelineTools.py` along with
 `rsGeoSettingsWindow()` and its `setObjID` / `setTess` / `setDisp` /
 `setVis` stubs. The shelf is now the only interface and its buttons pass
 arguments correctly, so no live caller is affected.
@@ -18,7 +18,7 @@ arguments correctly, so no live caller is affected.
 A floating window may be revisited later — see CLAUDE.md. If it comes
 back, callbacks must be Python callables / `functools.partial`.
 
-*Verify in Maya:* `importlib.reload(ul_pipelineTools)` — module should
+*Verify in Maya:* `importlib.reload(lr_pipelineTools)` — module should
 import clean with no NameError; every shelf button still fires.
 
 ### 2. Variable shadowing bug in `makeViewportShader` — DONE
@@ -192,13 +192,13 @@ scene, user, date, Maya version — useful for the RMIT teaching context
 to show provenance.
 
 ### 12. Configurable studio settings
-A tiny `ul_config.py` (or JSON) for: temp copy/paste path, publish
+A tiny `lr_config.py` (or JSON) for: temp copy/paste path, publish
 folder names, version padding, viewport texture size. Defaults preserve
 current behavior.
 
 ### 13. Docstrings + shelf install helper
 Docstrings on every artist-facing function, plus a `installShelf()`
-helper that builds an "Unlisted" shelf with buttons for the main tools,
+helper that builds an "lr_maya_pipeline_tools" shelf with buttons for the main tools,
 so colleagues can bootstrap with two lines in the script editor.
 
 ## Arnold support (HIGH PRIORITY — Arnold is the primary renderer)
@@ -318,7 +318,7 @@ colour slot from Issue 14.
 
 For each change, add a note here or in the commit message describing
 the in-Maya test, e.g.:
-- Issue 1: `importlib.reload(ul_pipelineTools)` imports clean; every
+- Issue 1: `importlib.reload(lr_pipelineTools)` imports clean; every
   shelf button fires in an unsaved scene and a saved `_working` scene.
 - Issue 2: run `makeViewportShader()` on a selection containing one
   UDIM-textured and one single-texture material; confirm both `__vp`

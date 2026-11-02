@@ -82,7 +82,7 @@ def versionUp():
     mel.eval('addRecentFile "'+incrementScene+'" "'+fileType+'";')
         
 # Saves the current file and exports everything in the scene as a new file in the published folder
-# doesnt work if the file exists outside of the Unlisted workflow
+# doesnt work if the file exists outside of the studio workflow
 def publishAll(dir):
     currentScene = mc.file(query=True, sceneName=True)
     currentName = mc.file(query=True, sceneName=True, shortName=True)
