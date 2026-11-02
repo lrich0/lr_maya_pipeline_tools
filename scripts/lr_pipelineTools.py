@@ -34,7 +34,13 @@ def versionUp():
 
     currentScene = mc.file(query=True, sceneName=True)
     if not currentScene:
-        mc.warning('versionUp: scene has not been saved yet - save it as name_v001.mb first')
+        answer = mc.confirmDialog(title='Version Up',
+                                  message='This file has not been previously saved. Click Save As to give it a filename.\n\nDon\'t forget to use version numbers, e.g. "_v001".',
+                                  button=['Save As...', 'Cancel'],
+                                  defaultButton='Save As...', cancelButton='Cancel', dismissString='Cancel')
+        if answer == 'Save As...':
+            # open maya's standard Save As dialog
+            mel.eval("SaveSceneAs;")
         return
 
     currentName = mc.file(query=True, sceneName=True, shortName=True)
