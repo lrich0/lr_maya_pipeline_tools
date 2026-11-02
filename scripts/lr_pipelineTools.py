@@ -5,7 +5,16 @@ import maya.mel as mel
 from maya.api.OpenMaya import MImage
 
 def saveAndBackup():
-    # currentScene = mc.file(query=True, sceneName=True)
+    currentScene = mc.file(query=True, sceneName=True)
+    if not currentScene:
+        answer = mc.confirmDialog(title='Save and Backup',
+                                  message='This file has not been previously saved. Click Save As to give it a filename.\n\nDon\'t forget to use version numbers, e.g. "_v001".',
+                                  button=['Save As...', 'Cancel'],
+                                  defaultButton='Save As...', cancelButton='Cancel', dismissString='Cancel')
+        if answer == 'Save As...':
+            # open maya's standard Save As dialog
+            mel.eval("SaveSceneAs;")
+        return
     # call the built in incremental save function in maya
     mel.eval("source incrementalSaveScene;")
     mel.eval("incrementalSaveScene;")
